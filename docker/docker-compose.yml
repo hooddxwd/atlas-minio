@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    image: zookeeper:3.4.14
+    container_name: atlas-zookeeper
+    hostname: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      - ZOO_MY_ID=1
+      - ZOO_SERVERS=server.1=zookeeper:2888:3888
+    networks:
+      - atlas-net
+
+  hbase:
+    image: harisekhon/hbase:1.4
+    container_name: atlas-hbase
+    hostname: hbase
+    ports:
+      - "8080:8080"
+      - "8085:8085"
+      - "9090:9090"
+      - "9095:9095"
+      - "16000:16000"
+      - "16010:16010"
+      - "16201:16201"
+      - "16301:16301"
+    environment:
+      - HBASE_MASTER_OPTS=hbase.master.dns.interface=eth0
+      - HBASE_REGIONSERVER_OPTS=hbase.regionserver.dns.interface=eth0
+    depends_on:
+      - zookeeper
+    networks:
+      - atlas-net
+
+  solr:
+    image: solr:7.7.3
+    container_name: atlas-solr
+    hostname: solr
+    ports:
+      - "8983:8983"
+    environment:
+      - ZK_HOST=zookeeper:2181
+    command:
+      - solr
+      - -c
+      - "-z"
+      - "zookeeper:2181"
+    depends_on:
+      - zookeeper
+    networks:
+      - atlas-net
+
+  atlas:
+    build:
+      context: .
+      dockerfile: Dockerfile.atlas
+    container_name: atlas-app
+    hostname: atlas
+    ports:
+      - "21000:21000"
+    environment:
+      - ATLAS_OPTS=-Datlas.rest.address=http://localhost:21000
+    volumes:
+      - ./config/application.properties:/opt/atlas/conf/application.properties:ro
+      - ./config/classification-rules.json:/opt/atlas/conf/classification-rules.json:ro
+    depends_on:
+      - hbase
+      - solr
+    networks:
+      - atlas-net
+    restart: unless-stopped
+
+networks:
+  atlas-net:
+    driver: bridge

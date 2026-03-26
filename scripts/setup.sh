@@ -30,5 +30,17 @@ else
     echo "✓ Atlas 源码已存在"
 fi
 
+# 创建配置文件模板
+cat > docker/config/application.properties.example << 'EOF'
+# MinIO 连接配置
+atlas.minio.endpoint=https://minio.example.com
+atlas.minio.access.key=YOUR_ACCESS_KEY
+atlas.minio.secret.key=YOUR_SECRET_KEY
+atlas.minio.region=us-east-1
+EOF
+
+echo "✓ 已创建配置文件模板: docker/config/application.properties.example"
+echo "  请复制并修改: cp docker/config/application.properties.example docker/config/application.properties"
+
 echo "=== 初始化完成 ==="
 echo "下一步: 运行 ./scripts/build.sh 构建项目"

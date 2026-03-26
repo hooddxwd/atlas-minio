@@ -10,10 +10,9 @@ if [ ! -f "docker/config/application.properties" ]; then
     exit 1
 fi
 
-# 启动 Docker Compose
+# 启动 Docker Compose（使用子shell避免改变当前目录）
 echo "正在启动 Docker Compose 环境..."
-cd docker
-docker-compose up -d
+(cd docker && docker-compose up -d)
 
 echo "✓ 部署完成"
 echo "Atlas Web UI: http://localhost:21000"
