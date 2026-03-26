@@ -19,7 +19,7 @@
   </appender>
 
   <logger name="org.apache.atlas.minio" additivity="false">
-    <level value="DEBUG"/>
+    <level value="INFO"/>
     <appender-ref ref="console"/>
     <appender-ref ref="file"/>
   </logger>

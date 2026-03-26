@@ -1,6 +1,3 @@
-# MinIO 配置文件（包含敏感信息）
-docker/config/application.properties
-
 # Atlas 构建输出
 atlas-source/*/target/
 atlas-source/*/build/
