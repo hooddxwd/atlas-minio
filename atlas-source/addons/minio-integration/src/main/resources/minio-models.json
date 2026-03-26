@@ -1,0 +1,277 @@
+{
+  "types": [
+    {
+      "name": "minio_bucket",
+      "superTypes": ["Asset"],
+      "typeVersion": "1.0",
+      "attributeDefinitions": [
+        {
+          "name": "name",
+          "typeName": "string",
+          "isUnique": true,
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "creationDate",
+          "typeName": "date",
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "location",
+          "typeName": "string",
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "owner",
+          "typeName": "string",
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "quota",
+          "typeName": "long",
+          "isIndexable": false,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "qualifiedName",
+          "typeName": "string",
+          "isUnique": true,
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "clusterName",
+          "typeName": "string",
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        }
+      ]
+    },
+    {
+      "name": "minio_object",
+      "superTypes": ["Referenceable"],
+      "typeVersion": "1.0",
+      "attributeDefinitions": [
+        {
+          "name": "bucketName",
+          "typeName": "string",
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "path",
+          "typeName": "string",
+          "isUnique": true,
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "size",
+          "typeName": "long",
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "contentType",
+          "typeName": "string",
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "etag",
+          "typeName": "string",
+          "isIndexable": false,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "lastModified",
+          "typeName": "date",
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "storageClass",
+          "typeName": "string",
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "versionId",
+          "typeName": "string",
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "userMetadata",
+          "typeName": "map<string,string>",
+          "isIndexable": false,
+          "cardinality": "SET"
+        },
+        {
+          "name": "contentEncoding",
+          "typeName": "string",
+          "isIndexable": false,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "cacheControl",
+          "typeName": "string",
+          "isIndexable": false,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "contentDisposition",
+          "typeName": "string",
+          "isIndexable": false,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "qualifiedName",
+          "typeName": "string",
+          "isUnique": true,
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "clusterName",
+          "typeName": "string",
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        }
+      ]
+    },
+    {
+      "name": "minio_sync_event",
+      "superTypes": ["Asset"],
+      "typeVersion": "1.0",
+      "attributeDefinitions": [
+        {
+          "name": "eventType",
+          "typeName": "string",
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "timestamp",
+          "typeName": "date",
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "bucketName",
+          "typeName": "string",
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "objectPath",
+          "typeName": "string",
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "status",
+          "typeName": "string",
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "errorMessage",
+          "typeName": "string",
+          "isIndexable": false,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "processedCount",
+          "typeName": "int",
+          "isIndexable": false,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "failedCount",
+          "typeName": "int",
+          "isIndexable": false,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "duration",
+          "typeName": "long",
+          "isIndexable": false,
+          "cardinality": "SINGLE"
+        },
+        {
+          "name": "qualifiedName",
+          "typeName": "string",
+          "isUnique": true,
+          "isIndexable": true,
+          "cardinality": "SINGLE"
+        }
+      ]
+    }
+  ],
+  "relationshipTypes": [
+    {
+      "name": "minio_bucket_objects",
+      "typeVersion": "1.0",
+      "relationshipCategory": "COMPOSITION",
+      "endDef1": {
+        "type": "minio_bucket",
+        "name": "objects",
+        "isContainer": true,
+        "cardinality": "SET",
+        "legacyName": "__minio_bucket.objects"
+      },
+      "endDef2": {
+        "type": "minio_object",
+        "name": "bucket",
+        "isContainer": false,
+        "cardinality": "SINGLE",
+        "legacyName": "__minio_object.bucket"
+      },
+      "propagateTags": "ONE_TO_TWO"
+    },
+    {
+      "name": "minio_object_sync_events",
+      "typeVersion": "1.0",
+      "relationshipCategory": "ASSOCIATION",
+      "endDef1": {
+        "type": "minio_object",
+        "name": "syncEvents",
+        "isContainer": false,
+        "cardinality": "SET",
+        "legacyName": "__minio_object.syncEvents"
+      },
+      "endDef2": {
+        "type": "minio_sync_event",
+        "name": "object",
+        "isContainer": false,
+        "cardinality": "SINGLE",
+        "legacyName": "__minio_sync_event.object"
+      },
+      "propagateTags": "NONE"
+    }
+  ],
+  "enumTypes": [
+    {
+      "name": "sync_status",
+      "enumValues": [
+        "SUCCESS",
+        "FAILED",
+        "PARTIAL",
+        "IN_PROGRESS"
+      ]
+    },
+    {
+      "name": "sync_event_type",
+      "enumValues": [
+        "FULL_SYNC",
+        "INCREMENTAL_SYNC",
+        "EVENT_DRIVEN"
+      ]
+    }
+  ]
+}
