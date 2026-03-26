@@ -17,7 +17,16 @@
       "Bash(ls -d atlas-source/*/)",
       "Read(//e//**)",
       "Read(//c/Users/hood/.claude/plugins/cache/superpowers-marketplace/superpowers/5.0.6/skills/subagent-driven-development/**)",
-      "Bash(mvn clean:*)"
+      "Bash(mvn clean:*)",
+      "Bash(find 'e:\\\\claude code projects\\\\atlas-minio\\\\atlas-source\\\\minio-integration\\\\src' -name *.java)",
+      "Bash(mvn compile:*)",
+      "Bash(mvn install:*)",
+      "Bash(mvn test:*)",
+      "Bash(wc -l atlas-source/minio-integration/src/main/java/org/apache/atlas/minio/classification/*.java atlas-source/minio-integration/src/main/java/org/apache/atlas/minio/model/Classification*.java atlas-source/minio-integration/src/test/java/org/apache/atlas/minio/classification/*.java)",
+      "Bash(find atlas-source/minio-integration/src/main/java -name *.java)",
+      "Bash(find atlas-source/minio-integration/src/test/java -name *.java)",
+      "Bash(curl -I http://129.226.204.202:10050/minio/health/live)",
+      "Bash(curl -s http://129.226.204.202:10050/ --user admin:password123)"
     ],
     "additionalDirectories": [
       "\\dev"

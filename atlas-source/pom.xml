@@ -65,6 +65,7 @@
         <module>graphdb</module>
 
         <module>intg</module>
+        <module>minio-integration</module>
         <module>notification</module>
         <module>plugin-classloader</module>
         <module>repository</module>
@@ -74,7 +75,6 @@
         <module>tools/classification-updater</module>
         <module>tools/notification-analyzer</module>
         <module>webapp</module>
-        <module>addons/minio-integration</module>
     </modules>
 
     <properties>

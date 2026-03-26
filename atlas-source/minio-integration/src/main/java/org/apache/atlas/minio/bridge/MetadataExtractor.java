@@ -9,7 +9,10 @@ import org.apache.atlas.minio.utils.MinIOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +22,8 @@ import java.util.Map;
  */
 public class MetadataExtractor {
     private static final Logger LOG = LoggerFactory.getLogger(MetadataExtractor.class);
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+            .withZone(ZoneId.systemDefault());
     private final MinIOClient client;
 
     public MetadataExtractor(MinIOClient client) {
@@ -30,7 +34,12 @@ public class MetadataExtractor {
         LOG.debug("提取 bucket 元数据: {}", s3Bucket.getName());
         MinioBucket bucket = new MinioBucket();
         bucket.setName(s3Bucket.getName());
-        bucket.setCreationDate(DATE_FORMAT.format(new Date(s3Bucket.getCreationDate().getTime())));
+        Date creationDate = s3Bucket.getCreationDate();
+        if (creationDate != null) {
+            bucket.setCreationDate(DATE_FORMATTER.format(Instant.ofEpochMilli(creationDate.getTime())));
+        } else {
+            bucket.setCreationDate(DATE_FORMATTER.format(Instant.now()));
+        }
         bucket.setOwner(s3Bucket.getOwner() != null ? s3Bucket.getOwner().getDisplayName() : "unknown");
         bucket.setLocation("default");
         bucket.addAttribute("s3_name", s3Bucket.getName());

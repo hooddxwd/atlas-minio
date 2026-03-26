@@ -7,7 +7,9 @@ import org.apache.atlas.minio.model.MinioObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,7 +20,8 @@ import java.util.Map;
 public class MinIOUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(MinIOUtils.class);
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+            .withZone(ZoneId.systemDefault());
 
     /**
      * 从 S3 摘要创建 MinioObject
@@ -60,9 +63,7 @@ public class MinIOUtils {
         if (date == null) {
             return null;
         }
-        synchronized (DATE_FORMAT) {
-            return DATE_FORMAT.format(date);
-        }
+        return DATE_FORMATTER.format(Instant.ofEpochMilli(date.getTime()));
     }
 
     /**

@@ -1,0 +1,31 @@
+// ------------------------------------------------------------------
+// Transitive dependencies of this project determined from the
+// maven pom organized by organization.
+// ------------------------------------------------------------------
+
+apache-atlas
+
+
+From: 'an unknown organization'
+  - Code Generation Library (http://cglib.sourceforge.net/) cglib:cglib:jar:2.2.2
+    License: ASF 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+From: 'ObjectWeb' (http://www.objectweb.org/)
+  - ASM Core (http://asm.objectweb.org/asm/) asm:asm:jar:3.3.1
+    License: BSD  (http://asm.objectweb.org/license.html)
+
+From: 'QOS.ch' (http://www.qos.ch)
+  - JUL to SLF4J bridge (http://www.slf4j.org) org.slf4j:jul-to-slf4j:jar:2.0.16
+    License: MIT License  (http://www.opensource.org/licenses/mit-license.php)
+  - SLF4J API Module (http://www.slf4j.org) org.slf4j:slf4j-api:jar:2.0.16
+    License: MIT License  (http://www.opensource.org/licenses/mit-license.php)
+  - SLF4J Reload4j Provider (http://reload4j.qos.ch) org.slf4j:slf4j-reload4j:jar:2.0.16
+    License: MIT License  (http://www.opensource.org/licenses/mit-license.php)
+
+From: 'QOS.CH Sarl (Switzerland)' (https://reload4j.qos.ch)
+  - reload4j (https://reload4j.qos.ch) ch.qos.reload4j:reload4j:jar:1.2.22
+    License: The Apache Software License, Version 2.0  (http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+
+
+
