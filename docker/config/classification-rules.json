@@ -1,0 +1,52 @@
+{
+  "rules": [
+    {
+      "name": "生产数据识别",
+      "type": "path",
+      "pattern": "/data/production/.*",
+      "classification": "production_data",
+      "attributes": {
+        "environment": "production",
+        "criticality": "high"
+      }
+    },
+    {
+      "name": "敏感数据识别",
+      "type": "metadata",
+      "key": "x-amz-meta-sensitive",
+      "value": "true",
+      "classification": "sensitive_data",
+      "attributes": {
+        "data_sensitivity": "high",
+        "access_control": "restricted"
+      }
+    },
+    {
+      "name": "备份数据识别",
+      "type": "path",
+      "pattern": ".*\\.backup$",
+      "classification": "backup",
+      "attributes": {
+        "retention_days": 90
+      }
+    },
+    {
+      "name": "临时文件识别",
+      "type": "path",
+      "pattern": "/tmp/.*",
+      "classification": "temporary",
+      "attributes": {
+        "retention_days": 7
+      }
+    },
+    {
+      "name": "文档类型识别",
+      "type": "contentType",
+      "pattern": "application/pdf",
+      "classification": "document",
+      "attributes": {
+        "file_type": "pdf"
+      }
+    }
+  ]
+}

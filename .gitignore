@@ -1,0 +1,22 @@
+# MinIO 配置文件（包含敏感信息）
+docker/config/application.properties
+
+# Atlas 构建输出
+atlas-source/*/target/
+atlas-source/*/build/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# 日志
+*.log
+
+# 临时文件
+*.tmp
+*.bak
+.DS_Store
