@@ -11,6 +11,7 @@ import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import org.apache.atlas.minio.model.MinioBucket;
 import org.apache.atlas.minio.model.MinioObject;
 import org.apache.atlas.minio.utils.MinIOConstants;
 import org.slf4j.Logger;
@@ -25,6 +26,8 @@ import java.util.List;
  */
 public class MinIOClient {
     private static final Logger LOG = LoggerFactory.getLogger(MinIOClient.class);
+    // Using max keys limit for AWS S3 API
+    private static final int DEFAULT_MAX_KEYS = 1000;
     private final AmazonS3 s3Client;
     private final String endpoint;
 
@@ -69,6 +72,21 @@ public class MinIOClient {
         }
     }
 
+    /**
+     * List buckets and convert to MinioBucket objects
+     */
+    public List<MinioBucket> listMinioBuckets() {
+        List<Bucket> buckets = listBuckets();
+        List<MinioBucket> minioBuckets = new ArrayList<>();
+        MetadataExtractor extractor = new MetadataExtractor(this);
+
+        for (Bucket bucket : buckets) {
+            minioBuckets.add(extractor.extractBucketMetadata(bucket));
+        }
+
+        return minioBuckets;
+    }
+
     public boolean bucketExists(String bucketName) {
         try {
             return s3Client.doesBucketExistV2(bucketName);
@@ -96,7 +114,7 @@ public class MinIOClient {
      * 列出 bucket 中的所有对象（使用默认前缀和批处理大小）
      */
     public List<MinioObject> listObjects(String bucketName) {
-        List<S3ObjectSummary> summaries = listObjects(bucketName, null, 1000);
+        List<S3ObjectSummary> summaries = listObjects(bucketName, null, DEFAULT_MAX_KEYS);
         MetadataExtractor extractor = new MetadataExtractor(this);
         List<MinioObject> objects = new ArrayList<>();
         extractor.extractObjectMetadataBatch(bucketName, summaries, objects);
@@ -138,5 +156,43 @@ public class MinIOClient {
             s3Client.shutdown();
             LOG.info("MinIO S3 客户端已关闭");
         }
+    }
+
+    /**
+     * Get a single object from MinIO
+     */
+    public MinioObject getObject(String bucketName, String objectPath) {
+        try {
+            ObjectMetadata metadata = s3Client.getObjectMetadata(bucketName, objectPath);
+            MetadataExtractor extractor = new MetadataExtractor(this);
+
+            // Create S3ObjectSummary from metadata
+            S3ObjectSummary summary = new S3ObjectSummary();
+            summary.setBucketName(bucketName);
+            summary.setKey(objectPath);
+            summary.setLastModified(metadata.getLastModified());
+            summary.setSize(metadata.getContentLength());
+            summary.setETag(metadata.getETag());
+
+            return extractor.extractObjectMetadata(bucketName, summary);
+        } catch (Exception e) {
+            LOG.error("获取对象失败: bucket={}, key={}", bucketName, objectPath, e);
+            throw new RuntimeException("Failed to get object", e);
+        }
+    }
+
+    /**
+     * List objects with prefix and limit
+     */
+    public List<MinioObject> listObjects(String bucketName, String prefix, int limit) {
+        List<S3ObjectSummary> summaries = listObjects(bucketName, prefix, limit);
+        MetadataExtractor extractor = new MetadataExtractor(this);
+        List<MinioObject> objects = new ArrayList<>();
+
+        for (S3ObjectSummary summary : summaries) {
+            objects.add(extractor.extractObjectMetadata(bucketName, summary));
+        }
+
+        return objects;
     }
 }

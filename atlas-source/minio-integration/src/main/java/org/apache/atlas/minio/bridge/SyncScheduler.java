@@ -233,6 +233,13 @@ public class SyncScheduler {
     }
 
     /**
+     * Get the latest sync report (alias for getLastSyncReport)
+     */
+    public SyncReport getLatestReport() {
+        return lastSyncReport;
+    }
+
+    /**
      * Get a specific sync report by ID
      */
     public SyncReport getSyncReport(String reportId) {
@@ -244,6 +251,22 @@ public class SyncScheduler {
      */
     public List<SyncReport> getAllSyncReports() {
         return List.copyOf(syncReports.values());
+    }
+
+    /**
+     * Get sync report history with limit
+     */
+    public List<SyncReport> getReportHistory(int limit) {
+        List<SyncReport> allReports = List.copyOf(syncReports.values());
+        // Sort by timestamp descending (most recent first)
+        allReports.sort((r1, r2) -> r2.getTimestamp().compareTo(r1.getTimestamp()));
+
+        // Return limited results
+        if (allReports.size() <= limit) {
+            return allReports;
+        }
+
+        return allReports.subList(0, limit);
     }
 
     /**

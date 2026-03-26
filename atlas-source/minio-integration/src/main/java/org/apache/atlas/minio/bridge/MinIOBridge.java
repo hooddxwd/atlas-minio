@@ -15,7 +15,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -32,6 +34,8 @@ public class MinIOBridge {
     private static final String ATTRIBUTE_QUALIFIED_NAME = "qualifiedName";
     private static final String FORMAT_BUCKET_QUALIFIED_NAME = "%s@%s";
     private static final String FORMAT_OBJECT_QUALIFIED_NAME = "%s@%s";
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+            .withZone(ZoneId.systemDefault());
 
     // Atlas Entity Types
     private static final String MINIO_BUCKET_TYPE = "minio_bucket";
@@ -273,7 +277,7 @@ public class MinIOBridge {
         entity.setAttribute("location", bucket.getLocation() != null ? bucket.getLocation() : "default");
 
         if (bucket.getCreationDate() != null) {
-            entity.setAttribute("creationDate", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(bucket.getCreationDate()));
+            entity.setAttribute("creationDate", DATE_FORMATTER.format(Instant.ofEpochMilli(bucket.getCreationDate().getTime())));
         }
 
         if (bucket.getQuota() != null) {
@@ -304,7 +308,7 @@ public class MinIOBridge {
         entity.setAttribute("etag", object.getETag());
 
         if (object.getLastModified() != null) {
-            entity.setAttribute("lastModified", new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(object.getLastModified()));
+            entity.setAttribute("lastModified", DATE_FORMATTER.format(Instant.ofEpochMilli(object.getLastModified().getTime())));
         }
 
         if (object.getContentType() != null) {
@@ -406,6 +410,127 @@ public class MinIOBridge {
         return String.format(FORMAT_OBJECT_QUALIFIED_NAME,
                 (bucketName.toLowerCase() + "/" + objectPath).toLowerCase(),
                 clusterName);
+    }
+
+    /**
+     * Test connection to MinIO
+     * This is the public method required by the specification
+     */
+    public boolean testConnection() {
+        return minioClient.testConnection();
+    }
+
+    /**
+     * Get MinIO endpoint URL
+     */
+    public String getEndpoint() {
+        return minioClient.getEndpoint();
+    }
+
+    /**
+     * List all buckets
+     */
+    public List<MinioBucket> listBuckets() {
+        return minioClient.listBuckets();
+    }
+
+    /**
+     * List objects in a bucket
+     */
+    public List<MinioObject> listObjects(String bucketName, String prefix, int limit) {
+        return minioClient.listObjects(bucketName, prefix, limit);
+    }
+
+    /**
+     * Get bucket by qualified name
+     */
+    public MinioBucket getBucket(String qualifiedName) {
+        try {
+            // Extract bucket name from qualified name
+            // Format: bucket-name@cluster
+            String bucketName = extractBucketNameFromQualifiedName(qualifiedName);
+            if (bucketName == null) {
+                return null;
+            }
+
+            // Get bucket info from MinIO
+            List<MinioBucket> buckets = minioClient.listBuckets();
+            for (MinioBucket bucket : buckets) {
+                if (bucket.getName().equalsIgnoreCase(bucketName)) {
+                    return bucket;
+                }
+            }
+
+            return null;
+        } catch (Exception e) {
+            LOG.error("Error getting bucket: {}", qualifiedName, e);
+            return null;
+        }
+    }
+
+    /**
+     * Get object by qualified name
+     */
+    public MinioObject getObject(String qualifiedName) {
+        try {
+            // Extract bucket and object path from qualified name
+            // Format: bucket-name/object-path@cluster
+            String[] parts = extractBucketAndObjectFromQualifiedName(qualifiedName);
+            if (parts == null || parts.length != 2) {
+                return null;
+            }
+
+            String bucketName = parts[0];
+            String objectPath = parts[1];
+
+            // Get object info from MinIO
+            return minioClient.getObject(bucketName, objectPath);
+        } catch (Exception e) {
+            LOG.error("Error getting object: {}", qualifiedName, e);
+            return null;
+        }
+    }
+
+    /**
+     * Extract bucket name from qualified name
+     */
+    private String extractBucketNameFromQualifiedName(String qualifiedName) {
+        if (qualifiedName == null || !qualifiedName.contains("@")) {
+            return null;
+        }
+
+        String[] parts = qualifiedName.split("@");
+        if (parts.length == 0) {
+            return null;
+        }
+
+        return parts[0];
+    }
+
+    /**
+     * Extract bucket and object path from qualified name
+     */
+    private String[] extractBucketAndObjectFromQualifiedName(String qualifiedName) {
+        if (qualifiedName == null || !qualifiedName.contains("@")) {
+            return null;
+        }
+
+        String[] parts = qualifiedName.split("@");
+        if (parts.length == 0) {
+            return null;
+        }
+
+        String fullPath = parts[0];
+        int slashIndex = fullPath.indexOf('/');
+
+        if (slashIndex <= 0 || slashIndex >= fullPath.length() - 1) {
+            return null;
+        }
+
+        String bucketName = fullPath.substring(0, slashIndex);
+        String objectPath = fullPath.substring(slashIndex + 1);
+
+        return new String[]{bucketName, objectPath};
     }
 
     /**
