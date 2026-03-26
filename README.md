@@ -3,8 +3,26 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 [![Atlas](https://img.shields.io/badge/Atlas-2.4.0-orange.svg)](https://atlas.apache.org/)
 [![MinIO](https://img.shields.io/badge/MinIO-Compatible-green.svg)](https://min.io/)
+[![Completion](https://img.shields.io/badge/completion-78.6%25-yellow.svg)]()
+[![Backend](https://img.shields.io/badge/backend-ready-brightgreen.svg)]()
 
 > 将 MinIO 对象存储元数据管理集成到 Apache Atlas 数据治理平台
+
+---
+
+## 👋 首次访问？从这里开始
+
+**🎯 项目状态：** 后端功能 100% 完成，可用于生产测试！
+
+**📚 快速了解项目：**
+1. ⭐ **[docs/context/README.md](docs/context/README.md)** - 项目上下文和完成状态
+2. **[docs/context/TODO.md](docs/context/TODO.md)** - 剩余任务清单
+3. **[docs/context/QUICK_REFERENCE.md](docs/context/QUICK_REFERENCE.md)** - 快速参考
+
+**🤖 Claude Code 用户：** 在新会话中说：
+> "继续开发 atlas-minio 项目，请阅读 docs/context/ 目录了解项目状态"
+
+---
 
 ## 🎯 项目简介
 
