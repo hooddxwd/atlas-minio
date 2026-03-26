@@ -277,6 +277,74 @@ class MinIOBridgeTest {
                 minioBridge.getObjectQualifiedName("Test-Bucket", "path/to/Object.txt"));
     }
 
+    @Test
+    void testImportBucketToAtlas() throws Exception {
+        // Arrange
+        MinioBucket bucket = createTestBucket("import-bucket");
+        when(mockAtlasClient.getEntityByAttribute(eq("minio_bucket"), any()))
+                .thenThrow(new AtlasServiceException("not found", 404));
+
+        EntityMutationResponse mockResponse = mock(EntityMutationResponse.class);
+        when(mockAtlasClient.createEntity(any(AtlasEntityWithExtInfo.class)))
+                .thenReturn(mockResponse);
+
+        // Act
+        minioBridge.importBucketToAtlas(bucket);
+
+        // Assert
+        ArgumentCaptor<AtlasEntityWithExtInfo> captor = ArgumentCaptor.forClass(AtlasEntityWithExtInfo.class);
+        verify(mockAtlasClient).createEntity(captor.capture());
+
+        AtlasEntity capturedEntity = captor.getValue().getEntity();
+        assertEquals("import-bucket", capturedEntity.getAttribute("name"));
+        assertEquals("minio_bucket", capturedEntity.getTypeName());
+    }
+
+    @Test
+    void testImportObjectToAtlas() throws Exception {
+        // Arrange
+        MinioObject object = createTestObject("test-bucket", "import-object.txt");
+
+        when(mockAtlasClient.getEntityByAttribute(eq("minio_object"), any()))
+                .thenThrow(new AtlasServiceException("not found", 404));
+
+        EntityMutationResponse mockResponse = mock(EntityMutationResponse.class);
+        when(mockAtlasClient.createEntity(any(AtlasEntityWithExtInfo.class)))
+                .thenReturn(mockResponse);
+
+        // Act
+        minioBridge.importObjectToAtlas(object);
+
+        // Assert
+        ArgumentCaptor<AtlasEntityWithExtInfo> captor = ArgumentCaptor.forClass(AtlasEntityWithExtInfo.class);
+        verify(mockAtlasClient).createEntity(captor.capture());
+
+        AtlasEntity capturedEntity = captor.getValue().getEntity();
+        assertEquals("import-object.txt", capturedEntity.getAttribute("path"));
+        assertEquals("minio_object", capturedEntity.getTypeName());
+    }
+
+    @Test
+    void testInitialize() throws Exception {
+        // Arrange
+        when(mockMinioClient.testConnection()).thenReturn(true);
+
+        // Act
+        minioBridge.initialize();
+
+        // Assert
+        verify(mockMinioClient).testConnection();
+    }
+
+    @Test
+    void testShutdown() throws Exception {
+        // Act
+        minioBridge.shutdown();
+
+        // Assert
+        verify(mockMinioClient).shutdown();
+    }
+
     // Helper methods
 
     private MinioBucket createTestBucket(String name) {

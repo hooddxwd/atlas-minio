@@ -11,10 +11,13 @@ import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
+import org.apache.atlas.minio.model.MinioObject;
 import org.apache.atlas.minio.utils.MinIOConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -87,6 +90,34 @@ public class MinIOClient {
             LOG.error("获取对象列表失败: bucket={}, prefix={}", bucketName, prefix, e);
             throw new RuntimeException("Failed to list objects", e);
         }
+    }
+
+    /**
+     * 列出 bucket 中的所有对象（使用默认前缀和批处理大小）
+     */
+    public List<MinioObject> listObjects(String bucketName) {
+        List<S3ObjectSummary> summaries = listObjects(bucketName, null, 1000);
+        MetadataExtractor extractor = new MetadataExtractor(this);
+        List<MinioObject> objects = new ArrayList<>();
+        extractor.extractObjectMetadataBatch(bucketName, summaries, objects);
+        return objects;
+    }
+
+    /**
+     * 列出指定时间之后修改的对象（用于增量同步）
+     * 注意：MinIO S3 API 不直接支持时间过滤，需要获取后过滤
+     */
+    public List<MinioObject> listObjectsModifiedSince(String bucketName, Date since) {
+        List<S3ObjectSummary> all = listObjects(bucketName, null, Integer.MAX_VALUE);
+        List<MinioObject> filtered = new ArrayList<>();
+        MetadataExtractor extractor = new MetadataExtractor(this);
+
+        for (S3ObjectSummary summary : all) {
+            if (summary.getLastModified().after(since)) {
+                filtered.add(extractor.extractObjectMetadata(bucketName, summary));
+            }
+        }
+        return filtered;
     }
 
     public ObjectMetadata getObjectMetadata(String bucketName, String objectKey) {

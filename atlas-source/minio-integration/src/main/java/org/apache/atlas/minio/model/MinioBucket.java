@@ -1,5 +1,10 @@
 package org.apache.atlas.minio.model;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +13,7 @@ import java.util.Map;
  * MinIO 存储桶模型
  */
 public class MinioBucket {
+    private static final Logger LOG = LoggerFactory.getLogger(MinioBucket.class);
     private String name;
     private Date creationDate;
     private String location;
@@ -35,8 +41,12 @@ public class MinioBucket {
      * Set creation date from String format
      */
     public void setCreationDate(String creationDate) {
-        // Store as string for now, conversion can be done by caller
-        if (this.creationDate == null) {
+        // Parse ISO 8601 string to Date
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+            this.creationDate = sdf.parse(creationDate);
+        } catch (ParseException e) {
+            LOG.warn("Failed to parse creation date: {}", creationDate, e);
             this.creationDate = new Date();
         }
     }

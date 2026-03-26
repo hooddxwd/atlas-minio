@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(chmod +x \"e:\\\\claude code projects\\\\atlas-minio\\\\scripts\\\\setup.sh\" \"e:\\\\claude code projects\\\\atlas-minio\\\\scripts\\\\build.sh\" \"e:\\\\claude code projects\\\\atlas-minio\\\\scripts\\\\deploy.sh\")",
+      "Bash(bash scripts/setup.sh)",
+      "Bash(git restore:*)",
+      "Bash(PROJECT_STATUS.md:*)",
+      "Bash(git clone:*)",
+      "Bash(ping -c 2 github.com)",
+      "Bash(curl -I https://github.com)",
+      "Bash(DOWNLOAD_ATLAS.md:*)",
+      "Bash(ls -lh *.tar.gz)",
+      "Bash(ls -lh *.gz)",
+      "Bash(ls -d atlas-source/*/)",
+      "Read(//e//**)",
+      "Read(//c/Users/hood/.claude/plugins/cache/superpowers-marketplace/superpowers/5.0.6/skills/subagent-driven-development/**)",
+      "Bash(mvn clean:*)"
+    ],
+    "additionalDirectories": [
+      "\\dev"
+    ]
+  }
+}

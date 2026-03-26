@@ -43,6 +43,9 @@ public class MinIOBridge {
     @Value("${atlas.minio.sync.batch.size:100}")
     private int batchSize;
 
+    @Value("${atlas.minio.sync.thread.pool.size:5}")
+    private int syncThreadPoolSize;
+
     private final AtlasClientV2 atlasClient;
     private final MinIOClient minioClient;
     private final MetadataExtractor metadataExtractor;
@@ -67,17 +70,40 @@ public class MinIOBridge {
     @PostConstruct
     public void init() {
         LOG.info("MinIOBridge starting...");
+        initialize();
+    }
+
+    /**
+     * Initialize the MinIOBridge - test connection and validate setup
+     * This is the public method required by the specification
+     */
+    public void initialize() {
+        LOG.info("Initializing MinIOBridge...");
+        boolean connected = minioClient.testConnection();
+        if (!connected) {
+            throw new RuntimeException("Failed to connect to MinIO server at " + minioClient.getEndpoint());
+        }
+        LOG.info("MinIOBridge initialized successfully");
     }
 
     @PreDestroy
     public void destroy() {
         LOG.info("MinIOBridge shutting down...");
+        shutdown();
+    }
+
+    /**
+     * Shutdown the MinIOBridge gracefully
+     * This is the public method required by the specification
+     */
+    public void shutdown() {
+        LOG.info("Shutting down MinIOBridge...");
         try {
             if (minioClient != null) {
-                minioClient.close();
+                minioClient.shutdown();
             }
         } catch (Exception e) {
-            LOG.error("Error closing MinIO client", e);
+            LOG.error("Error shutting down MinIO client", e);
         }
     }
 
@@ -177,6 +203,22 @@ public class MinIOBridge {
         }
 
         return stats;
+    }
+
+    /**
+     * Import a MinIO bucket to Atlas
+     * This is the public method required by the specification
+     */
+    public void importBucketToAtlas(MinioBucket bucket) throws Exception {
+        syncBucket(bucket);
+    }
+
+    /**
+     * Import a MinIO object to Atlas
+     * This is the public method required by the specification
+     */
+    public void importObjectToAtlas(MinioObject object) throws Exception {
+        syncObject(object);
     }
 
     /**
