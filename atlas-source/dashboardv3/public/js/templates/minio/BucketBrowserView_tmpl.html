@@ -1,0 +1,48 @@
+{{#*inline "partials/page_header"}}
+<div class="row">
+    <div class="col-md-12">
+        <h4 class="page-header">
+            <a href="#!/minio/dashboard">MinIO</a> / Buckets
+            <button class="btn btn-sm btn-default pull-right refresh-btn" title="Refresh">
+                <i class="fa fa-refresh"></i> Refresh
+            </button>
+        </h4>
+    </div>
+</div>
+{{/inline}}
+
+<div class="animated fadeIn bucket-browser">
+    {{> partials/page_header}}
+
+    <!-- Search and Filter -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-primary">
+                <div class="box-body">
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            <i class="fa fa-search"></i>
+                        </span>
+                        <input type="text" class="form-control search-input" placeholder="Search buckets by name or owner...">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Buckets Table -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-info">
+                <div class="box-header with-border">
+                    <h3 class="box-title">
+                        <i class="fa fa-database"></i> Buckets
+                    </h3>
+                </div>
+                <div class="box-body">
+                    <div id="r_bucketsTable"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

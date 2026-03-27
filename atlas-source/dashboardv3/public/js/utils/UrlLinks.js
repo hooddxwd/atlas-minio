@@ -293,6 +293,43 @@ define(['require', 'utils/Enums', 'utils/Utils', 'underscore'], function(require
         },
         downloadSearchResultsFileUrl: function(fileName) {
             return this.baseUrlV2 + '/search/download/' + fileName;
+        },
+        // MinIO Integration URLs
+        minioApiUrl: function() {
+            return this.baseUrl + '/minio';
+        },
+        minioTest: function() {
+            return this.minioApiUrl() + '/test';
+        },
+        minioBuckets: function() {
+            return this.minioApiUrl() + '/buckets';
+        },
+        minioBucket: function(bucketName) {
+            return this.minioApiUrl() + '/buckets/' + bucketName;
+        },
+        minioObjects: function() {
+            return this.minioApiUrl() + '/objects';
+        },
+        minioObject: function(objectId) {
+            return this.minioApiUrl() + '/objects/' + objectId;
+        },
+        minioClassify: function() {
+            return this.minioApiUrl() + '/classify';
+        },
+        minioSync: function() {
+            return this.minioApiUrl() + '/sync';
+        },
+        minioSyncStatus: function() {
+            return this.minioApiUrl() + '/sync/status';
+        },
+        minioSyncHistory: function() {
+            return this.minioApiUrl() + '/sync/history';
+        },
+        minioSyncReport: function() {
+            return this.minioApiUrl() + '/sync/report';
+        },
+        minioEvents: function() {
+            return this.minioApiUrl() + '/events';
         }
     });
 

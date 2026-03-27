@@ -55,6 +55,10 @@ define([
             '!/administrator/businessMetadata/:id': 'businessMetadataDetailPage',
             //Debug Metrics
             '!/debugMetrics': 'debugMetrics',
+            // MinIO Integration
+            '!/minio/dashboard': 'minioDashboard',
+            '!/minio/buckets': 'minioBuckets',
+            '!/minio/sync': 'minioSync',
             // Default
             "*actions": "defaultAction"
         },
@@ -536,6 +540,61 @@ define([
                     }
                 });
                 App.rContent.show(new BusinessMetadataContainerLayoutView(options));
+            });
+        },
+        // MinIO Integration Routes
+        minioDashboard: function() {
+            var that = this;
+            require(["views/site/Header", "views/site/SideNavLayoutView", "views/minio/MinioDashboardView"], function(Header, SideNavLayoutView, MinioDashboardView) {
+                var paramObj = Utils.getUrlState.getQueryParams(),
+                    options = _.extend({ value: paramObj }, that.preFetchedCollectionLists, that.sharedObj, that.ventObj);
+                that.renderViewIfNotExists(that.getHeaderOptions(Header));
+                that.renderViewIfNotExists({
+                    view: App.rSideNav,
+                    manualRender: function() {
+                        this.view.currentView.manualRender(options);
+                    },
+                    render: function() {
+                        return new SideNavLayoutView(options);
+                    }
+                });
+                App.rContent.show(new MinioDashboardView(options));
+            });
+        },
+        minioBuckets: function() {
+            var that = this;
+            require(["views/site/Header", "views/site/SideNavLayoutView", "views/minio/BucketBrowserView"], function(Header, SideNavLayoutView, BucketBrowserView) {
+                var paramObj = Utils.getUrlState.getQueryParams(),
+                    options = _.extend({ value: paramObj }, that.preFetchedCollectionLists, that.sharedObj, that.ventObj);
+                that.renderViewIfNotExists(that.getHeaderOptions(Header));
+                that.renderViewIfNotExists({
+                    view: App.rSideNav,
+                    manualRender: function() {
+                        this.view.currentView.manualRender(options);
+                    },
+                    render: function() {
+                        return new SideNavLayoutView(options);
+                    }
+                });
+                App.rContent.show(new BucketBrowserView(options));
+            });
+        },
+        minioSync: function() {
+            var that = this;
+            require(["views/site/Header", "views/site/SideNavLayoutView", "views/minio/SyncMonitorView"], function(Header, SideNavLayoutView, SyncMonitorView) {
+                var paramObj = Utils.getUrlState.getQueryParams(),
+                    options = _.extend({ value: paramObj }, that.preFetchedCollectionLists, that.sharedObj, that.ventObj);
+                that.renderViewIfNotExists(that.getHeaderOptions(Header));
+                that.renderViewIfNotExists({
+                    view: App.rSideNav,
+                    manualRender: function() {
+                        this.view.currentView.manualRender(options);
+                    },
+                    render: function() {
+                        return new SideNavLayoutView(options);
+                    }
+                });
+                App.rContent.show(new SyncMonitorView(options));
             });
         },
         defaultAction: function(actions) {

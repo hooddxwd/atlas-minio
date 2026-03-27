@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MinIO UI - Preview</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- AdminLTE -->
+    <link href="https://cdn.bootcdn.net/ajax/libs/admin-lte/2.4.18/css/AdminLTE.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #f5f5f5;
+        }
+        .atlas-header {
+            background-color: #2c3e50;
+            padding: 15px 20px;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,.1);
+        }
+        .header-menu {
+            float: right;
+        }
+        .header-menu a {
+            color: white;
+            padding: 10px 15px;
+            text-decoration: none;
+        }
+        .container-fluid {
+            padding: 20px;
+        }
+        .box {
+            background: white;
+            border-top: 3px solid #d2d6de;
+            margin-bottom: 20px;
+            width: 100%;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+            border-radius: 3px;
+        }
+        .box-header {
+            padding: 10px 15px;
+            border-bottom: 1px solid #f4f4f4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .box-title {
+            font-size: 18px;
+            margin: 0;
+        }
+        .box-body {
+            padding: 15px;
+        }
+        .btn-primary {
+            background-color: #3c8dbc;
+            border-color: #367fa9;
+        }
+        .btn-success {
+            background-color: #00a65a;
+            border-color: #008d4c;
+        }
+        .btn-warning {
+            background-color: #f39c12;
+            border-color: #e08e0b;
+        }
+        .btn-default {
+            background-color: #f4f4f4;
+            border-color: #ddd;
+        }
+        .info-box {
+            display: block;
+            min-height: 90px;
+            background: #fff;
+            width: 100%;
+            box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+            border-radius: 2px;
+            margin-bottom: 15px;
+            padding: 10px;
+        }
+        .info-box-icon {
+            border-top-left-radius: 2px;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+            border-bottom-left-radius: 2px;
+            display: block;
+            float: left;
+            height: 90px;
+            width: 90px;
+            text-align: center;
+            font-size: 45px;
+            line-height: 90px;
+            background: rgba(0,0,0,0.2);
+            color: rgba(255,255,255,0.8);
+        }
+        .info-box-content {
+            padding-left: 110px;
+        }
+        .info-box-number {
+            display: block;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .info-box-text {
+            display: block;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .bg-aqua { background-color: #00c0ef !important; }
+        .bg-green { background-color: #00a65a !important; }
+        .bg-yellow { background-color: #f39c12 !important; }
+        .text-success { color: #00a65a !important; }
+        .text-danger { color: #dd4b39 !important; }
+        .text-warning { color: #f39c12 !important; }
+        .progress {
+            height: 20px;
+            margin-bottom: 20px;
+        }
+        .progress-bar {
+            line-height: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="atlas-header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="font-size: 24px; font-weight: bold;">
+                <i class="fa fa-cube"></i> Apache Atlas
+            </div>
+            <div class="header-menu">
+                <a href="#"><i class="fa fa-user"></i> admin</a>
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                    MinIO <i class="fa fa-caret-down"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- MinIO Dropdown Menu (模拟) -->
+    <div id="minio-menu" style="display:none; position: absolute; right: 20px; top: 60px; background: white; border-radius: 4px; box-shadow: 0 6px 12px rgba(0,0,0,.175); z-index: 1000; min-width: 200px;">
+        <ul style="list-style: none; padding: 10px 0; margin: 0;">
+            <li><a href="#dashboard" style="display: block; padding: 8px 20px; color: #333; text-decoration: none;">Dashboard</a></li>
+            <li><a href="#buckets" style="display: block; padding: 8px 20px; color: #333; text-decoration: none;">Buckets</a></li>
+            <li><a href="#sync" style="display: block; padding: 8px 20px; color: #333; text-decoration: none;">Sync Monitor</a></li>
+        </ul>
+    </div>
+
+    <div class="container-fluid">
+        <!-- Dashboard Page -->
+        <div id="page-dashboard">
+            <h2 style="margin-bottom: 20px;">
+                <a href="#">MinIO</a> / Dashboard
+                <button class="btn btn-sm btn-default pull-right" onclick="refreshDashboard()">
+                    <i class="fa fa-refresh"></i> Refresh
+                </button>
+            </h2>
+
+            <!-- Connection Status -->
+            <div class="box box-primary">
+                <div class="box-header">
+                    <h3 class="box-title"><i class="fa fa-server"></i> Connection Status</h3>
+                    <button class="btn btn-sm btn-primary">Test Connection</button>
+                </div>
+                <div class="box-body">
+                    <i class="fa fa-check-circle text-success"></i>
+                    <span style="margin-left: 10px;">Connected to MinIO at 129.226.204.202:10050</span>
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="box box-info">
+                <div class="box-header">
+                    <h3 class="box-title"><i class="fa fa-bar-chart"></i> Statistics</h3>
+                </div>
+                <div class="box-body">
+                    <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                        <div class="info-box" style="flex: 1; min-width: 250px;">
+                            <span class="info-box-icon bg-aqua">
+                                <i class="fa fa-database"></i>
+                            </span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Total Buckets</span>
+                                <span class="info-box-number">5</span>
+                            </div>
+                        </div>
+                        <div class="info-box" style="flex: 1; min-width: 250px;">
+                            <span class="info-box-icon bg-green">
+                                <i class="fa fa-file-o"></i>
+                            </span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Total Objects</span>
+                                <span class="info-box-number">1,234</span>
+                            </div>
+                        </div>
+                        <div class="info-box" style="flex: 1; min-width: 250px;">
+                            <span class="info-box-icon bg-yellow">
+                                <i class="fa fa-hdd-o"></i>
+                            </span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Total Storage</span>
+                                <span class="info-box-number">2.3 TB</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sync Status -->
+            <div class="box box-success">
+                <div class="box-header">
+                    <h3 class="box-title"><i class="fa fa-refresh"></i> Sync Status</h3>
+                    <button class="btn btn-sm btn-success">Sync Now</button>
+                </div>
+                <div class="box-body">
+                    <div>
+                        <i class="fa fa-check-circle text-success"></i>
+                        <span style="margin-left: 10px;">Last sync: 2026-03-27 02:00:00 (Success)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="box box-default">
+                <div class="box-header">
+                    <h3 class="box-title"><i class="fa fa-link"></i> Quick Links</h3>
+                </div>
+                <div class="box-body">
+                    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="showPage('buckets')">
+                            <i class="fa fa-database"></i> Browse Buckets
+                        </button>
+                        <button class="btn btn-info">
+                            <i class="fa fa-file-o"></i> Browse Objects
+                        </button>
+                        <button class="btn btn-warning" onclick="showPage('sync')">
+                            <i class="fa fa-refresh"></i> Sync Monitor
+                        </button>
+                        <button class="btn btn-default">
+                            <i class="fa fa-search"></i> Search MinIO
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Buckets Page -->
+        <div id="page-buckets" style="display:none;">
+            <h2 style="margin-bottom: 20px;">
+                <a href="#" onclick="showPage('dashboard')">MinIO</a> / Buckets
+                <button class="btn btn-sm btn-default pull-right">
+                    <i class="fa fa-refresh"></i> Refresh
+                </button>
+            </h2>
+
+            <!-- Search -->
+            <div class="box box-primary">
+                <div class="box-body">
+                    <input type="text" class="form-control" placeholder="Search buckets by name or owner...">
+                </div>
+            </div>
+
+            <!-- Buckets Table -->
+            <div class="box box-info">
+                <div class="box-header">
+                    <h3 class="box-title"><i class="fa fa-database"></i> Buckets</h3>
+                </div>
+                <div class="box-body">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Bucket Name</th>
+                                <th>Owner</th>
+                                <th>Created</th>
+                                <th>Objects</th>
+                                <th>Size</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>data-lake</td>
+                                <td>admin</td>
+                                <td>2026-03-20</td>
+                                <td>523</td>
+                                <td>1.2 TB</td>
+                                <td>
+                                    <button class="btn btn-xs btn-primary"><i class="fa fa-files-o"></i></button>
+                                    <button class="btn btn-xs btn-info"><i class="fa fa-info-circle"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>backup-store</td>
+                                <td>admin</td>
+                                <td>2026-03-15</td>
+                                <td>312</td>
+                                <td>850 GB</td>
+                                <td>
+                                    <button class="btn btn-xs btn-primary"><i class="fa fa-files-o"></i></button>
+                                    <button class="btn btn-xs btn-info"><i class="fa fa-info-circle"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>analytics-data</td>
+                                <td>data-team</td>
+                                <td>2026-03-10</td>
+                                <td>289</td>
+                                <td>180 GB</td>
+                                <td>
+                                    <button class="btn btn-xs btn-primary"><i class="fa fa-files-o"></i></button>
+                                    <button class="btn btn-xs btn-info"><i class="fa fa-info-circle"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>ml-models</td>
+                                <td>ml-team</td>
+                                <td>2026-03-05</td>
+                                <td>67</td>
+                                <td>45 GB</td>
+                                <td>
+                                    <button class="btn btn-xs btn-primary"><i class="fa fa-files-o"></i></button>
+                                    <button class="btn btn-xs btn-info"><i class="fa fa-info-circle"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>logs-archive</td>
+                                <td>devops</td>
+                                <td>2026-03-01</td>
+                                <td>43</td>
+                                <td>12 GB</td>
+                                <td>
+                                    <button class="btn btn-xs btn-primary"><i class="fa fa-files-o"></i></button>
+                                    <button class="btn btn-xs btn-info"><i class="fa fa-info-circle"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sync Monitor Page -->
+        <div id="page-sync" style="display:none;">
+            <h2 style="margin-bottom: 20px;">
+                <a href="#" onclick="showPage('dashboard')">MinIO</a> / Sync Monitor
+                <button class="btn btn-sm btn-default pull-right">
+                    <i class="fa fa-refresh"></i> Refresh
+                </button>
+            </h2>
+
+            <!-- Current Sync Status -->
+            <div class="box box-primary">
+                <div class="box-header">
+                    <h3 class="box-title"><i class="fa fa-refresh"></i> Current Sync Status</h3>
+                    <div>
+                        <button class="btn btn-sm btn-success">Sync Now</button>
+                        <button class="btn btn-sm btn-warning">Full Sync</button>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <div style="margin-bottom: 15px;">
+                        <i class="fa fa-check-circle text-success fa-2x"></i>
+                        <span style="font-size: 18px; margin-left: 10px;">Completed Successfully</span>
+                    </div>
+
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-success" style="width: 100%">100%</div>
+                    </div>
+
+                    <div style="display: flex; gap: 30px; margin-top: 15px;">
+                        <div>
+                            <h4 class="text-success">523</h4>
+                            <small>Processed</small>
+                        </div>
+                        <div>
+                            <h4 class="text-danger">0</h4>
+                            <small>Failed</small>
+                        </div>
+                        <div>
+                            <h4>2m 15s</h4>
+                            <small>Duration</small>
+                        </div>
+                        <div>
+                            <h4>2026-03-27 02:00</h4>
+                            <small>Last Sync</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sync History -->
+            <div class="box box-info">
+                <div class="box-header">
+                    <h3 class="box-title"><i class="fa fa-history"></i> Sync History</h3>
+                    <select class="form-control" style="width: 150px;">
+                        <option>Last 7 days</option>
+                        <option>Last 30 days</option>
+                    </select>
+                </div>
+                <div class="box-body">
+                    <table class="table table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Processed</th>
+                                <th>Failed</th>
+                                <th>Duration</th>
+                                <th>Error</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>2026-03-27 02:00</td>
+                                <td>INCREMENTAL</td>
+                                <td><span class="label label-success">SUCCESS</span></td>
+                                <td>523</td>
+                                <td>0</td>
+                                <td>2m 15s</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>2026-03-26 02:00</td>
+                                <td>INCREMENTAL</td>
+                                <td><span class="label label-success">SUCCESS</span></td>
+                                <td>489</td>
+                                <td>0</td>
+                                <td>1m 58s</td>
+                                <td>-</td>
+                            </tr>
+                            <tr>
+                                <td>2026-03-25 02:00</td>
+                                <td>FULL</td>
+                                <td><span class="label label-warning">PARTIAL</span></td>
+                                <td>450/460</td>
+                                <td>10</td>
+                                <td>5m 32s</td>
+                                <td><span class="text-danger">Timeout: bucket-xyz</span></td>
+                            </tr>
+                            <tr>
+                                <td>2026-03-24 02:00</td>
+                                <td>INCREMENTAL</td>
+                                <td><span class="label label-success">SUCCESS</span></td>
+                                <td>312</td>
+                                <td>0</td>
+                                <td>1m 45s</td>
+                                <td>-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Schedule Information -->
+            <div class="box box-default">
+                <div class="box-header">
+                    <h3 class="box-title"><i class="fa fa-clock-o"></i> Schedule Information</h3>
+                </div>
+                <div class="box-body">
+                    <dl class="dl-horizontal">
+                        <dt>Automatic Sync:</dt>
+                        <dd>Enabled (Daily at 2:00 AM)</dd>
+                        <dt>Next Scheduled:</dt>
+                        <dd>2026-03-28 02:00:00</dd>
+                        <dt>Sync Mode:</dt>
+                        <dd>Incremental (with periodic full sync)</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script>
+        function showPage(page) {
+            // Hide all pages
+            document.getElementById('page-dashboard').style.display = 'none';
+            document.getElementById('page-buckets').style.display = 'none';
+            document.getElementById('page-sync').style.display = 'none';
+
+            // Show selected page
+            document.getElementById('page-' + page).style.display = 'block';
+        }
+
+        function refreshDashboard() {
+            alert('刷新数据...（模拟）');
+        }
+
+        // Dropdown menu toggle
+        document.querySelector('.dropdown-toggle').addEventListener('click', function(e) {
+            e.preventDefault();
+            var menu = document.getElementById('minio-menu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.dropdown-toggle') && !e.target.closest('#minio-menu')) {
+                document.getElementById('minio-menu').style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
