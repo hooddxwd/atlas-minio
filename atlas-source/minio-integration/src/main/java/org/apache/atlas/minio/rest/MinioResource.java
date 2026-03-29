@@ -171,7 +171,7 @@ public class MinioResource {
 
             LOG.debug("Listing MinIO buckets...");
 
-            List<MinioBucket> buckets = minioBridge.listMinioBuckets();
+            List<MinioBucket> buckets = minioBridge.listBuckets();
 
             LOG.debug("Retrieved {} buckets", buckets.size());
             return Response.ok(buckets).build();

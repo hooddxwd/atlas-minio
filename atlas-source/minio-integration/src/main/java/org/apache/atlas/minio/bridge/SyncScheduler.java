@@ -11,8 +11,10 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -250,14 +252,14 @@ public class SyncScheduler {
      * Get all recent sync reports
      */
     public List<SyncReport> getAllSyncReports() {
-        return List.copyOf(syncReports.values());
+        return new ArrayList<>(syncReports.values());
     }
 
     /**
      * Get sync report history with limit
      */
     public List<SyncReport> getReportHistory(int limit) {
-        List<SyncReport> allReports = List.copyOf(syncReports.values());
+        List<SyncReport> allReports = new ArrayList<>(syncReports.values());
         // Sort by timestamp descending (most recent first)
         allReports.sort((r1, r2) -> r2.getTimestamp().compareTo(r1.getTimestamp()));
 
@@ -320,14 +322,13 @@ public class SyncScheduler {
     }
 
     private void logScheduledJobs() throws SchedulerException {
-        List<String> jobNames = quartzScheduler.getJobNames(JOB_GROUP);
-        LOG.info("Currently scheduled jobs: {}", jobNames);
+        Set<JobKey> jobKeys = quartzScheduler.getJobKeys(GroupMatcher.jobGroupEquals(JOB_GROUP));
+        LOG.info("Currently scheduled jobs: {}", jobKeys);
 
-        for (String jobName : jobNames) {
-            JobKey jobKey = JobKey.jobKey(jobName, JOB_GROUP);
-            List<Trigger> triggers = quartzScheduler.getTriggersOfJob(jobKey);
+        for (JobKey jobKey : jobKeys) {
+            List<? extends Trigger> triggers = quartzScheduler.getTriggersOfJob(jobKey);
             for (Trigger trigger : triggers) {
-                LOG.info("  - Job: {}, Next fire time: {}", jobName, trigger.getNextFireTime());
+                LOG.info("  - Job: {}, Next fire time: {}", jobKey.getName(), trigger.getNextFireTime());
             }
         }
     }

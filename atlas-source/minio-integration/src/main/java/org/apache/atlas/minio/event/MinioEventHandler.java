@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -341,7 +342,7 @@ public class MinioEventHandler {
      * Get dead letter queue for inspection
      */
     public List<MinioEvent> getDeadLetterQueueItems() {
-        return List.copyOf(deadLetterQueue);
+        return new ArrayList<>(deadLetterQueue);
     }
 
     /**

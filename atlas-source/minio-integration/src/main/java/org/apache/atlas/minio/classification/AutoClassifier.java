@@ -205,8 +205,8 @@ public class AutoClassifier {
                     AtlasClassification classification = new AtlasClassification(classificationName, classificationAttrs);
 
                     try {
-                        atlasClient.addClassification(entity.getEntity().getGuid(),
-                                Collections.singleton(classification));
+                        atlasClient.addClassifications(entity.getEntity().getGuid(),
+                                Collections.singletonList(classification));
 
                         LOG.debug("Applied automatic classification {} to entity {} with attributes: {}",
                                 classificationName, qualifiedName, classificationAttrs);
@@ -275,7 +275,7 @@ public class AutoClassifier {
             throw new IllegalArgumentException("Entity not found: " + qualifiedName);
         }
 
-        atlasClient.removeClassification(entity.getEntity().getGuid(), classification);
+        atlasClient.removeClassification(entity.getEntity().getGuid(), classification, null);
         LOG.info("Removed classification {} from entity {}", classification, qualifiedName);
     }
 

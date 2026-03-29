@@ -5,6 +5,7 @@ import org.apache.atlas.AtlasServiceException;
 import org.apache.atlas.minio.model.MinioBucket;
 import org.apache.atlas.minio.model.MinioObject;
 import org.apache.atlas.minio.model.ClassificationResult;
+import org.apache.atlas.model.SearchFilter;
 import org.apache.atlas.model.instance.AtlasClassification;
 import org.apache.atlas.model.instance.AtlasEntity;
 import org.apache.atlas.model.instance.AtlasEntity.AtlasEntityWithExtInfo;
@@ -128,8 +129,12 @@ public class ManualClassification {
      * @throws Exception if any classification doesn't exist
      */
     private void validateClassifications(List<String> tags) throws Exception {
-        AtlasTypesDef typesDef = atlasClient.getAllTypeDefs();
-        Map<String, AtlasClassificationDef> classificationDefs = typesDef.getClassificationDefsAsMap();
+        SearchFilter filter = new SearchFilter();
+        AtlasTypesDef typesDef = atlasClient.getAllTypeDefs(filter);
+        Map<String, AtlasClassificationDef> classificationDefs = new HashMap<>();
+        for (AtlasClassificationDef def : typesDef.getClassificationDefs()) {
+            classificationDefs.put(def.getName(), def);
+        }
 
         List<String> invalidTags = new ArrayList<>();
         for (String tag : tags) {
@@ -168,11 +173,13 @@ public class ManualClassification {
                 }
 
                 // Apply each classification
+                List<AtlasClassification> classifications = new ArrayList<>();
                 for (String tag : tags) {
-                    AtlasClassification classification = new AtlasClassification(tag);
-                    atlasClient.addClassification(entity.getEntity().getGuid(),
-                            Collections.singleton(classification));
+                    classifications.add(new AtlasClassification(tag));
+                }
+                atlasClient.addClassifications(entity.getEntity().getGuid(), classifications);
 
+                for (String tag : tags) {
                     LOG.debug("Applied classification {} to entity {}", tag, qualifiedName);
                 }
 
@@ -221,7 +228,7 @@ public class ManualClassification {
             // Remove automatic classifications
             for (String classification : classificationsToRemove) {
                 try {
-                    atlasClient.removeClassification(entity.getEntity().getGuid(), classification);
+                    atlasClient.removeClassification(entity.getEntity().getGuid(), classification, null);
                     LOG.debug("Removed automatic classification {} from entity {}", classification, qualifiedName);
                 } catch (Exception e) {
                     LOG.warn("Failed to remove automatic classification {} from entity {}",
@@ -271,7 +278,7 @@ public class ManualClassification {
             throw new IllegalArgumentException("Entity not found: " + qualifiedName);
         }
 
-        atlasClient.removeClassification(entity.getEntity().getGuid(), classification);
+        atlasClient.removeClassification(entity.getEntity().getGuid(), classification, null);
         LOG.info("Removed classification {} from entity {}", classification, qualifiedName);
     }
 

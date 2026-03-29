@@ -184,7 +184,7 @@ public class MinIOClient {
     /**
      * List objects with prefix and limit
      */
-    public List<MinioObject> listObjects(String bucketName, String prefix, int limit) {
+    public List<MinioObject> listMinioObjects(String bucketName, String prefix, int limit) {
         List<S3ObjectSummary> summaries = listObjects(bucketName, prefix, limit);
         MetadataExtractor extractor = new MetadataExtractor(this);
         List<MinioObject> objects = new ArrayList<>();

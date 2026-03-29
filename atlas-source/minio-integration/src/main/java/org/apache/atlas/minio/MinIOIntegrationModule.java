@@ -1,15 +1,14 @@
 package org.apache.atlas.minio;
 
 import org.apache.atlas.minio.bridge.MinIOBridge;
-import org.apache.atlas.minio.event.MinioEventNotifier;
 import org.apache.atlas.minio.classification.ClassificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.ComponentScan;
 
 /**
- * MinIO 集成模块主类
- * 负责初始化和管理 MinIO 集成功能
+ * MinIO Integration Module Main Class
+ * Responsible for initializing and managing MinIO integration features
  */
 @ComponentScan(basePackages = "org.apache.atlas.minio")
 public class MinIOIntegrationModule {
@@ -17,50 +16,43 @@ public class MinIOIntegrationModule {
     private static final Logger LOG = LoggerFactory.getLogger(MinIOIntegrationModule.class);
 
     private final MinIOBridge bridge;
-    private final MinioEventNotifier eventNotifier;
     private final ClassificationService classificationService;
 
     public MinIOIntegrationModule(MinIOBridge bridge,
-                                   MinioEventNotifier eventNotifier,
                                    ClassificationService classificationService) {
         this.bridge = bridge;
-        this.eventNotifier = eventNotifier;
         this.classificationService = classificationService;
     }
 
     /**
-     * 初始化 MinIO 集成模块
+     * Initialize MinIO integration module
      */
     public void initialize() {
-        LOG.info("正在初始化 MinIO 集成模块...");
+        LOG.info("Initializing MinIO integration module...");
 
         try {
-            // 初始化桥接器
+            // Initialize bridge
             bridge.initialize();
 
-            // 启动事件监听器
-            eventNotifier.start();
-
-            LOG.info("MinIO 集成模块初始化完成");
+            LOG.info("MinIO integration module initialized successfully");
         } catch (Exception e) {
-            LOG.error("MinIO 集成模块初始化失败", e);
+            LOG.error("Failed to initialize MinIO integration module", e);
             throw new RuntimeException("Failed to initialize MinIO integration", e);
         }
     }
 
     /**
-     * 关闭 MinIO 集成模块
+     * Shutdown MinIO integration module
      */
     public void shutdown() {
-        LOG.info("正在关闭 MinIO 集成模块...");
+        LOG.info("Shutting down MinIO integration module...");
 
         try {
-            eventNotifier.stop();
             bridge.shutdown();
 
-            LOG.info("MinIO 集成模块已关闭");
+            LOG.info("MinIO integration module shut down");
         } catch (Exception e) {
-            LOG.error("关闭 MinIO 集成模块时出错", e);
+            LOG.error("Error shutting down MinIO integration module", e);
         }
     }
 }

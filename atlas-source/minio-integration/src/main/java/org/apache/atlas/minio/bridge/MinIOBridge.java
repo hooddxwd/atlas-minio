@@ -120,7 +120,7 @@ public class MinIOBridge {
 
         try {
             // Sync all buckets
-            List<MinioBucket> buckets = minioClient.listBuckets();
+            List<MinioBucket> buckets = minioClient.listMinioBuckets();
             LOG.info("Found {} buckets to sync", buckets.size());
 
             for (MinioBucket bucket : buckets) {
@@ -174,7 +174,7 @@ public class MinIOBridge {
         }
 
         try {
-            List<MinioBucket> buckets = minioClient.listBuckets();
+            List<MinioBucket> buckets = minioClient.listMinioBuckets();
 
             for (MinioBucket bucket : buckets) {
                 try {
@@ -431,14 +431,14 @@ public class MinIOBridge {
      * List all buckets
      */
     public List<MinioBucket> listBuckets() {
-        return minioClient.listBuckets();
+        return minioClient.listMinioBuckets();
     }
 
     /**
      * List objects in a bucket
      */
     public List<MinioObject> listObjects(String bucketName, String prefix, int limit) {
-        return minioClient.listObjects(bucketName, prefix, limit);
+        return minioClient.listObjects(bucketName);
     }
 
     /**
@@ -454,7 +454,7 @@ public class MinIOBridge {
             }
 
             // Get bucket info from MinIO
-            List<MinioBucket> buckets = minioClient.listBuckets();
+            List<MinioBucket> buckets = minioClient.listMinioBuckets();
             for (MinioBucket bucket : buckets) {
                 if (bucket.getName().equalsIgnoreCase(bucketName)) {
                     return bucket;

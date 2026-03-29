@@ -1,0 +1,73 @@
+# Apache Atlas 2.4.0 with MinIO Integration
+# Multi-stage build
+
+FROM maven:3.8-jdk-8 AS builder
+
+WORKDIR /build
+
+# Copy Atlas source
+COPY atlas-source /build
+
+# Build minio-integration module only (fast)
+# Skip tests and license checks for faster build
+RUN mvn clean install -pl minio-integration -am \
+    -DskipTests -Drat.skip=true -Dcheckstyle.skip=true \
+    -Dmaven.javadoc.skip=true -q
+
+# Build full Atlas distribution
+# This may take a while
+RUN mvn clean package -DskipTests -Drat.skip=true -Dcheckstyle.skip=true \
+    -Dmaven.javadoc.skip=true -Pdist,embedded-hbase-solr \
+    -pl distro -am -q || true
+
+# Runtime stage
+FROM openjdk:8-jdk-slim
+
+# Install required packages
+RUN apt-get update && apt-get install -y \
+    curl \
+    netcat \
+    procps \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create atlas user
+RUN groupadd -r atlas && useradd -r -g atlas atlas
+
+# Set up Atlas directory
+WORKDIR /opt/atlas
+
+# Copy Atlas distribution from builder
+# Note: In production, you should use the actual atlas distribution tar.gz
+COPY --from=builder /build/distro/target/apache-atlas-2.4.0-server.tar.gz /tmp/
+
+# Extract Atlas
+RUN tar -xzf /tmp/apache-atlas-2.4.0-server.tar.gz -C /opt/atlas --strip-components=1 \
+    && rm -f /tmp/apache-atlas-*.tar.gz \
+    && chown -R atlas:atlas /opt/atlas
+
+# Copy MinIO integration module
+COPY --from=builder /build/minio-integration/target/minio-integration-2.4.0.jar /opt/atlas/lib/
+COPY --from=builder /build/minio-integration/target/classes/minio-models.json /opt/atlas/conf/
+
+# Copy default configurations
+COPY config/application.properties /opt/atlas/conf/
+COPY config/classification-rules.json /opt/atlas/conf/
+COPY config/log4j.xml /opt/atlas/conf/
+
+# Create data directories
+RUN mkdir -p /opt/atlas/data /opt/atlas/logs \
+    && chown -R atlas:atlas /opt/atlas
+
+# Switch to atlas user
+USER atlas
+
+# Expose Atlas port
+EXPOSE 21000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=120s --retries=3 \
+    CMD curl -f http://localhost:21000/api/atlas/admin/status || exit 1
+
+# Start Atlas
+ENTRYPOINT ["/opt/atlas/bin/atlas_start.py"]
+CMD ["-port", "21000"]
